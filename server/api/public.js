@@ -5,36 +5,18 @@ import { EVENT_TYPES, publicCard, defaultOrderMessage } from '../model.js';
 
 const router = express.Router();
 
-const hits = new Mapp();
+const hitBuckets = new Map();
 
-class Mapp {
-  constructor() {
-    this.store = new MappStore();
+function hitCount(key) {
+  const now = Date.now();
+  const bucket = hitBuckets.get(key);
+  if (!bucket || now - bucket.start > 60000) {
+    if (hitBuckets.size > 4000) hitBuckets.clear();
+    hitBuckets.set(key, { count: 1, start: now });
+    return 1;
   }
-  take(key) {
-    const now = Date.now();
-    const bucket = this.store.get(key) || { count: 0, start: now };
-    if (now - bucket.start > 60000) {
-      bucket.count = 0;
-      bucket.start = now;
-    }
-    bucket.count += 1;
-    this.store.set(key, bucket);
-    return bucket.count;
-  }
-}
-
-class MappStore {
-  constructor() {
-    this.mapp = new MappMap();
-  }
-  get(key) {
-    return this.mapp.get(key);
-  }
-  set(key, value) {
-    if (this.mapp.size > 4000) this.mapp.clear();
-    this.mapp.set(key, value);
-  }
+  bucket.count += 1;
+  return bucket.count;
 }
 
 function findActive(slug) {
@@ -71,7 +53,7 @@ router.get('/card/:slug', (req, res) => {
 
 router.post('/track', (req, res) => {
   const ip = String(req.ip || req.headers['x-forwarded-for'] || 'unknown');
-  if (hits.take(ip) > 180) return res.status(429).json({ error: 'Too many requests' });
+  if (hitCount(ip) > 180) return res.status(429).json({ error: 'Too many requests' });
   const body = req.body || {};
   const type = String(body.type || '');
   if (!EVENT_TYPES.includes(type)) return res.status(400).json({ error: 'Unknown event type' });
