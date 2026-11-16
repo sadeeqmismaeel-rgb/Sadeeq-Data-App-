@@ -1,6 +1,6 @@
 import express from 'express';
 import QRCode from 'qrcode';
-import { get, all, run } from '../db.js';
+import { get, all, run, nowSql } from '../db.js';
 import { EVENT_TYPES, publicCard, defaultOrderMessage } from '../model.js';
 
 const router = express.Router();
