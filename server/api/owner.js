@@ -100,14 +100,14 @@ router.put('/whatsapp', (req, res) => {
   if (digits.length < 8 || digits.length > 15) {
     return res.status(400).json({ error: 'Enter a valid WhatsApp number with country code.' });
   }
-  const message = str(body.message, 600);
+  const message = str(body.message !== undefined && body.message !== null ? body.message : body.whatsappMessage, 600);
   run('UPDATE businesses SET whatsapp = ?, updated_at = ? WHERE id = ?', [number, nowSql(), req.business.id]);
   run(
     `INSERT INTO settings (business_id, key, value) VALUES (?, 'whatsapp_message', ?)
      ON CONFLICT(business_id, key) DO UPDATE SET value = excluded.value`,
     [req.business.id, message]
   );
-  res.json({ whatsapp: number, message });
+  res.json({ whatsapp: number, message, whatsappMessage: message });
 });
 
 router.put('/account', (req, res) => {
