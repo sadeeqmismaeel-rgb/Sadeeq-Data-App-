@@ -108,7 +108,7 @@ async function main() {
       method: 'POST',
       body: { slug: 'ss-aminan-juna', type }
     });
-    check(`track ${type}`, res.status === 200, `status ${res.status}`);
+    check(`track ${type}`, res.status === 204, `status ${res.status}`);
   }
   check('invalid event rejected', (await visitor('/api/public/track', { method: 'POST', body: { slug: 'ss-aminan-juna', type: 'bogus' } })).status === 400);
 
@@ -175,14 +175,14 @@ async function main() {
     method: 'PUT',
     body: { preset: 'midnight', primary: '#123456', secondary: '#abcdef', background: 'dark', buttonStyle: 'pill', cardStyle: 'glass', fontStyle: 'classic' }
   });
-  check('appearance saved', appearance.status === 200 && appearance.data?.business?.theme?.primary === '#123456', JSON.stringify(appearance.data));
+  check('appearance saved', appearance.status === 200 && appearance.data?.theme?.primary === '#123456', JSON.stringify(appearance.data));
   const appearanceBad = await owner('/api/owner/appearance', { method: 'PUT', body: { primary: 'javascript:alert(1)' } });
-  check('invalid colour sanitised', appearanceBad.status === 200 && /^#[0-9a-f]{6}$/i.test(appearanceBad.data?.business?.theme?.primary));
+  check('invalid colour sanitised', appearanceBad.status === 200 && /^#[0-9a-f]{6}$/i.test(appearanceBad.data?.theme?.primary));
   const wa = await owner('/api/owner/whatsapp', {
     method: 'PUT',
     body: { whatsapp: '+2348146508373', whatsappMessage: 'Assalamu Alaikum, ina son yin oda.' }
   });
-  check('whatsapp message saved', wa.status === 200 && /ina son/.test(wa.data?.business?.whatsappMessage || ''));
+  check('whatsapp message saved', wa.status === 200 && /ina son/.test(wa.data?.message || ''));
 
   console.log('QR + owner analytics');
   const qrOwner = await owner('/api/owner/qr');
@@ -192,7 +192,7 @@ async function main() {
   check('admin dashboard blocked for owner', (await owner('/api/admin/overview')).status === 403);
   const overview = await admin('/api/admin/overview');
   check('admin overview 200', overview.status === 200);
-  check('admin sees multiple businesses', (overview.data?.stats?.businesses || 0) >= 2, JSON.stringify(overview.data?.stats));
+  check('admin sees multiple businesses', (overview.data?.totals?.businesses || 0) >= 2, JSON.stringify(overview.data?.totals));
   check('admin business list', (overview.data?.businesses || []).length >= 2);
   const search = await admin('/api/admin/overview?q=abu');
   check('admin search filters', (search.data?.businesses || []).every((b) => /abu/i.test(`${b.name} ${b.slug} ${b.category}`)));

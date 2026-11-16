@@ -21,8 +21,7 @@ function hitCount(key) {
 
 function findActive(slug) {
   const business = get('SELECT * FROM businesses WHERE slug = ?', [String(slug || '').toLowerCase()]);
-  if (!business) return { business: null, code: 404 };
-  if (business.status !== 'active') return { business: null, code: 403 };
+  if (!business || business.status !== 'active') return { business: null, code: 404 };
   return { business, code: 200 };
 }
 
@@ -39,11 +38,7 @@ function baseUrl(req) {
 router.get('/card/:slug', (req, res) => {
   const found = findActive(req.params.slug);
   if (!found.business) {
-    return res.status(found.code).json({
-      error: found.code === 403
-        ? 'This business card is currently unavailable.'
-        : 'Business card not found.'
-    });
+    return res.status(found.code).json({ error: 'Business card not found.' });
   }
   const payload = publicCard(found.business.id);
   payload.business.cardUrl = `${baseUrl(req)}/card/${found.business.slug}`;

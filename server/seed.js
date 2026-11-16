@@ -132,7 +132,7 @@ export function seed() {
   });
   const ssBusiness = createBusiness(ssOwner, {
     slug: 'ss-aminan-juna',
-    name: 'S & S Aminan Juna – Duniyar Jallabiya',
+    name: 'S & S AMINAN JUNA – DUNIYAR JALLABIYA',
     tagline: 'Premium Jallabiya & Islamic Fashion',
     description:
       'S & S Aminan Juna – Duniyar Jallabiya is the home of premium, hand-finished Islamic fashion in Bauchi. We design Jallabiya, Kaftan, Alkalami, Babban Riga and Morocco styles using rich fabrics, elegant embroidery and careful tailoring for weddings, Eid and everyday elegance. Nationwide delivery available.',
